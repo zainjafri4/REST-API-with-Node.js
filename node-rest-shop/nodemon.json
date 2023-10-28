@@ -1,0 +1,5 @@
+{
+    "env" :{
+        "mongoPass" : "node-rest-shop-123"
+    }
+}
