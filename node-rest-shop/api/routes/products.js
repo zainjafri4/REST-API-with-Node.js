@@ -4,8 +4,36 @@ const router = express.Router();
 const Product = require("./models/products");
 const mongoose = require("mongoose");
 
+const multer = require('multer');
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, './uploads/');
+    },
+    filename: function (req, file, cb) {
+        const timestamp = Date.now(); // Unix timestamp
+        cb(null, `${timestamp}_${file.originalname}`);
+    }
+});
+
+const fileFilter = (req, file, cb) => {
+    if (file.mimetype == 'image/jpeg' || 'image/jpg' || 'image/png') {
+        cb(null, true)
+    } else {
+        cb(new Error("File Type not Supported"), false)
+    }
+}
+
+
+const upload = multer({
+    storage: storage, limits: {
+        fileSize: 1024 * 1024 * 5,
+    },
+    fileFilter: fileFilter
+})
+
 router.get("/", (req, res, next) => {
-    Product.find().select('name price _id').exec()
+    Product.find().select('name price _id productImage').exec()
         .then(docs => {
             console.log(docs);
             if (docs.length >= 1) {
@@ -15,6 +43,7 @@ router.get("/", (req, res, next) => {
                         return {
                             name: doc.name,
                             price: doc.price,
+                            productImage : doc.productImage,
                             _id: doc._id,
                             request: {
                                 type: "GET",
@@ -36,11 +65,13 @@ router.get("/", (req, res, next) => {
         })
 });
 
-router.post("/", (req, res, next) => {
+router.post("/", upload.single('productImage'), (req, res, next) => {
+    console.log(req.file)
     const product = new Product({
         _id: new mongoose.Types.ObjectId(),
         name: req.body.name,
         price: req.body.price,
+        productImage : req.file.path
     });
 
     product
@@ -51,7 +82,7 @@ router.post("/", (req, res, next) => {
             res.status(200).json({
                 message: "Product Added",
                 Product: {
-                    name : result.name,
+                    name: result.name,
                     price: result.price,
                     _id: result._id,
                     request: {
@@ -76,15 +107,15 @@ router.get("/:productId", (req, res, next) => {
     //     return res.status(404).json({ message: "Invalid id" });
     // }
 
-    Product.findById(id).select('name price _id').exec()
+    Product.findById(id).select('name price _id productImage').exec()
         .then(doc => {
             console.log(doc)
             if (doc) {
                 res.status(200).json({
-                    Product : doc,
+                    Product: doc,
                     request: {
-                        type : "GET",
-                        url: '/products/'+ doc._id
+                        type: "GET",
+                        url: '/products/' + doc._id
                     }
                 });
             } else {
@@ -113,7 +144,7 @@ router.patch("/:productId", (req, res, next) => {
             res.status(200).json({
                 message: "Product Updated",
                 request: {
-                    type : "GET",
+                    type: "GET",
                     url: '/products/' + id
                 }
             })
@@ -130,9 +161,9 @@ router.delete("/:productId", (req, res, next) => {
     Product.findByIdAndDelete(id).exec()
         .then(result => {
             res.status(200).json({
-                message : "Product Deleted",
+                message: "Product Deleted",
                 request: {
-                    type : "POST",
+                    type: "POST",
                     url: 'http://localhost:3000/products'
                 }
             })
