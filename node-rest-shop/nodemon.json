@@ -1,5 +1,6 @@
 {
     "env" :{
-        "mongoPass" : "node-rest-shop-123"
+        "mongoPass" : "node-rest-shop-123",
+        "JWT_KEY" : "secret_bro"
     }
 }

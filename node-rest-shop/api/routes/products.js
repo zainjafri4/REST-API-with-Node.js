@@ -1,8 +1,10 @@
 const express = require("express");
 const router = express.Router();
-
-const Product = require("./models/products");
 const mongoose = require("mongoose");
+const Auth = require('../middleWares/auth');
+
+const Product = require("../models/products");
+
 
 const multer = require('multer');
 
@@ -65,7 +67,7 @@ router.get("/", (req, res, next) => {
         })
 });
 
-router.post("/", upload.single('productImage'), (req, res, next) => {
+router.post("/", Auth, upload.single('productImage'), (req, res, next) => {
     console.log(req.file)
     const product = new Product({
         _id: new mongoose.Types.ObjectId(),
@@ -130,7 +132,7 @@ router.get("/:productId", (req, res, next) => {
         });
 });
 
-router.patch("/:productId", (req, res, next) => {
+router.patch("/:productId", Auth,(req, res, next) => {
     const id = req.params.productId
 
     updateOps = {};
@@ -156,7 +158,7 @@ router.patch("/:productId", (req, res, next) => {
         })
 });
 
-router.delete("/:productId", (req, res, next) => {
+router.delete("/:productId", Auth,(req, res, next) => {
     const id = req.params.productId
     Product.findByIdAndDelete(id).exec()
         .then(result => {

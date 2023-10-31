@@ -1,10 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
-const Order = require("./models/orders");
-const Product = require("./models/products");
+const Order = require("../models/orders");
+const Product = require("../models/products");
+const Auth = require('../middleWares/auth');
 
-router.get("/", (req, res, next) => {
+router.get("/", Auth, (req, res, next) => {
     Order.find()
         .select("product quantity _id")
         .populate('product', 'name')
@@ -37,7 +38,7 @@ router.get("/", (req, res, next) => {
         });
 });
 
-router.post("/", (req, res, next) => {
+router.post("/", Auth,(req, res, next) => {
     Product.findById(req.body.productId)
         .exec()
         .then((product) => {
@@ -70,7 +71,7 @@ router.post("/", (req, res, next) => {
         });
 });
 
-router.get("/:orderId", (req, res, next) => {
+router.get("/:orderId", Auth,(req, res, next) => {
     orderId = req.params.orderId;
     Order.findById(orderId)
         .populate('product', 'name')
@@ -92,7 +93,7 @@ router.get("/:orderId", (req, res, next) => {
         });
 });
 
-router.delete("/:orderId", (req, res, next) => {
+router.delete("/:orderId", Auth,(req, res, next) => {
     id = req.params.orderId;
     Order.findByIdAndDelete(id)
         .exec()
