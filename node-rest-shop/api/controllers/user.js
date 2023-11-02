@@ -34,7 +34,7 @@ module.exports.user_signup = (req, res, next) => {
                 .catch((err) => {
                   console.log(err),
                     res.status(500).json({
-                      Message: "User Creation Faile",
+                      Message: "User Creation Failed",
                       Error: err,
                     });
                 });
@@ -67,7 +67,7 @@ module.exports.user_signup = (req, res, next) => {
               },
                "Secret",
                {
-                  expiresIn : "1h"
+                  expiresIn : "22h"
                })
   
   
@@ -85,7 +85,7 @@ module.exports.user_signup = (req, res, next) => {
       })
       .catch((err) => {
         res.status(500).json({
-          Message: "User Could Not Be Deleted",
+          Message: "Error Occured",
           Error: err, // Return the actual error object
         });
       });
